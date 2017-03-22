@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-4.3.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	<mvc:annotation-driven />
+	<!-- 静态资源处理， css， js， imgs -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<!-- 指定spring mvc管理的bean -->
+	<context:component-scan base-package="com.springmvc" />
+	<bean class="com.spring.aop.MyAspect" id="myaspect"></bean>
+	<aop:config>
+		<aop:aspect id="aspectId" ref="myaspect">
+			<aop:pointcut
+				expression="execution(* com.springmvc.controller.ProcessMessageController.base(..))"
+				id="pointcutId" />
+			<aop:before method="testBefore" pointcut-ref="pointcutId" />
+			<aop:after method="testAfter" pointcut-ref="pointcutId"/>
+			<aop:after-returning method="testReturn" pointcut-ref="pointcutId"/>
+			<aop:after-throwing method="testThroweException" pointcut-ref="pointcutId"/>
+			<aop:around method="testAround" pointcut="execution(* com.springmvc.controller.ProcessMessageController.getIndex(..))"/>
+			<aop:around method="testAroundWithArgs" pointcut="execution(* com.springmvc.controller.ProcessMessageController.around(String,int))
+				and args(name,age)
+			"/>
+		</aop:aspect>
+	</aop:config>
+	<bean id="jspViewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/pages/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!--200*1024*1024即200M resolveLazily属性启用是为了推迟文件解析，以便捕获文件大小异常 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="209715200" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="resolveLazily" value="true" />
+	</bean>
+</beans>
